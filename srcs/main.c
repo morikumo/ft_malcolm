@@ -13,6 +13,7 @@ int main(int argc, char **argv)
     struct in_addr src_ip, target_ip;
     unsigned char src_mac[6], target_mac[6];
     struct timeval tv;
+    struct sigaction sa;
 
     if (argc != 5)
     {
@@ -33,13 +34,19 @@ int main(int argc, char **argv)
     if (g_env.sockfd < 0)
         return (perror("socket"), 1);
 
-    /* ⬇ AJOUT IMPORTANT : timeout recvfrom */
+    /* Timeout pour rendre recvfrom interruptible */
     tv.tv_sec = 1;
     tv.tv_usec = 0;
     setsockopt(g_env.sockfd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
 
+    /* Installation propre du handler SIGINT (sans SA_RESTART) */
+    memset(&sa, 0, sizeof(sa));
+    sa.sa_handler = sigint_handler;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
+    sigaction(SIGINT, &sa, NULL);
+
     g_env.running = 1;
-    signal(SIGINT, sigint_handler);
 
     find_interface(g_env.sockfd);
     listen_and_spoof(g_env.sockfd, src_ip, src_mac, target_ip, target_mac);

@@ -180,3 +180,15 @@ Pendant l’écoute :
 ```
 Ctrl + C
 ```
+
+
+Pour vérifier que l'attaque à fonctionner :
+```
+ip neigh flush all (cible)
+
+./ft_malcolm (attaquant)
+
+ping (cible)
+
+ip neigh (cible)
+```
